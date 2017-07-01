@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">ImageSearcher</string>
+
+    <string name="title_engine">Choose Engine</string>
+
+    <string name="action_search">Search</string>
+    <string name="action_view_type">View type</string>
+
+    <string name="msg_search_placeholder">Input keyword here...</string>
+    <string name="msg_no_data">No data</string>
+</resources>
