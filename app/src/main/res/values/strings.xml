@@ -5,7 +5,17 @@
 
     <string name="action_search">Search</string>
     <string name="action_view_type">View type</string>
+    <string name="action_download">Download</string>
 
     <string name="msg_search_placeholder">Input keyword here...</string>
     <string name="msg_no_data">No data</string>
+    <string name="msg_download_success">Download successfully</string>
+    <string name="msg_download_error">Failed to download</string>
+
+    <string name="permission_reason_title">Below permissions are necessary</string>
+    <string name="permission_storage_reason">Storage - Save image to external storage</string>
+    <string name="permission_camera_reason">Camera - Take a picture</string>
+    <string name="permission_not_granted_setting">Please enable related permissions in "Settings"</string>
+    <string name="permission_not_granted">One or more permissions are not granted</string>
+    <string name="permission_btn_settings">Settings</string>
 </resources>

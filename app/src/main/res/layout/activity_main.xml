@@ -1,102 +1,112 @@
-<android.support.design.widget.CoordinatorLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.christclin.imagesearcher.MainActivity">
+    android:layout_height="match_parent">
 
-    <android.support.design.widget.AppBarLayout
+    <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_height="match_parent"
+        tools:context="com.christclin.imagesearcher.MainActivity">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            app:contentInsetStartWithNavigation="0dp"
-            app:titleMarginEnd="12dp"
-            app:popupTheme="@style/AppTheme.PopupOverlay">
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.AppBarOverlay">
 
-            <android.support.v7.widget.AppCompatSpinner
-                android:id="@+id/spinner_engine"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="4dp"
-                android:paddingRight="4dp"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="4dp"
-                android:layout_marginLeft="12dp"
-                android:layout_marginRight="12dp"
-                android:background="@drawable/btn_background"/>
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                app:contentInsetStartWithNavigation="0dp"
+                app:titleMarginEnd="12dp"
+                app:popupTheme="@style/AppTheme.PopupOverlay">
 
-        </android.support.v7.widget.Toolbar>
+                <android.support.v7.widget.AppCompatSpinner
+                    android:id="@+id/spinner_engine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="4dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:layout_marginLeft="12dp"
+                    android:layout_marginRight="12dp"
+                    android:background="@drawable/btn_background"/>
+
+            </android.support.v7.widget.Toolbar>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:padding="8dp">
+
+                <Button android:id="@+id/btn_search"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="@string/action_search"
+                    android:background="@drawable/btn_background"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:textColor="@color/search_btn_border"
+                    android:textSize="16sp"
+                    android:fontFamily="sans-serif-condensed"/>
+
+                <EditText android:id="@+id/edittext_keyword"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/btn_background"
+                    android:layout_toLeftOf="@+id/btn_search"
+                    android:layout_toStartOf="@+id/btn_search"
+                    android:paddingLeft="12dp"
+                    android:paddingRight="12dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginRight="4dp"
+                    android:hint="@string/msg_search_placeholder"/>
+
+            </RelativeLayout>
+
+        </android.support.design.widget.AppBarLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            android:padding="8dp">
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <Button android:id="@+id/btn_search"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="@string/action_search"
-                android:background="@drawable/btn_background"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true"
-                android:textColor="@color/search_btn_border"
-                android:textSize="16sp"
-                android:fontFamily="sans-serif-condensed"/>
-
-            <EditText android:id="@+id/edittext_keyword"
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/btn_background"
-                android:layout_toLeftOf="@+id/btn_search"
-                android:layout_toStartOf="@+id/btn_search"
-                android:paddingLeft="12dp"
-                android:paddingRight="12dp"
-                android:layout_marginEnd="4dp"
-                android:layout_marginRight="4dp"
-                android:hint="@string/msg_search_placeholder"/>
+                android:clipToPadding="false"
+                android:padding="@dimen/item_space_margin" />
+
+            <TextView android:id="@+id/empty"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textSize="26sp"
+                android:textColor="@color/colorPrimary"
+                android:fontFamily="sans-serif-condensed"
+                android:textStyle="bold"
+                android:text="@string/msg_no_data"
+                android:visibility="gone"/>
+
+            <ProgressBar android:id="@+id/loading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:visibility="gone"/>
 
         </RelativeLayout>
 
-    </android.support.design.widget.AppBarLayout>
+    </android.support.design.widget.CoordinatorLayout>
 
-    <RelativeLayout
+    <com.christclin.imagesearcher.widget.ImagesPlayerView
+        android:id="@+id/images_player"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:visibility="gone"/>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recyclerview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:padding="@dimen/item_space_margin" />
-
-        <TextView android:id="@+id/empty"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:textSize="26sp"
-            android:textColor="@color/colorPrimary"
-            android:fontFamily="sans-serif-condensed"
-            android:textStyle="bold"
-            android:text="@string/msg_no_data"
-            android:visibility="gone"/>
-
-        <ProgressBar android:id="@+id/loading"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:visibility="gone"/>
-
-    </RelativeLayout>
-
-
-
-</android.support.design.widget.CoordinatorLayout>
+</RelativeLayout>

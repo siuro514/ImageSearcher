@@ -3,39 +3,21 @@
 
     <item
         is-multidex="true"
-        jar="/Users/chris/.android/build-cache/86e05d4e5ba12dbc394c3b558d0a7b06ecef84b3/output/jars/classes.jar"
+        jar="/Users/chris/workspace/github/ImageSearcher/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
         jumboMode="true"
         optimize="true"
         revision="25.0.2"
-        sha1="2df65d287bcfe491b42060d85a99217ad4e7c534">
-        <dex dex="/Users/chris/workspace/test/ImageSearcher/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_bcf772edec477191a09383c53b7fe01b33a1a535/classes.dex" />
+        sha1="b0dc0df37b3231511ba57bbd317cca7a77f62df2">
+        <dex dex="/Users/chris/workspace/github/ImageSearcher/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run-bootstrap_04ea6ea62347b41686bbd4ed717227c47fcadf5c/classes.dex" />
     </item>
     <item
         is-multidex="true"
-        jar="/Users/chris/workspace/test/ImageSearcher/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="25.0.2"
-        sha1="76bc7e7f79baf2dbabef4cdd1678f31076a4ef1c">
-        <dex dex="/Users/chris/workspace/test/ImageSearcher/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run-bootstrap_1f38d39a80548ed74ef8498d47df3ad4ce7654d9/classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="/Users/chris/workspace/test/ImageSearcher/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
+        jar="/Users/chris/workspace/github/ImageSearcher/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
         jumboMode="true"
         optimize="true"
         revision="25.0.2"
         sha1="3be78ebc2706b2e1fe2f12d5726887a92d6c183b">
-        <dex dex="/Users/chris/workspace/test/ImageSearcher/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run_19364547a9b01aab06a437b2a1f4aef6c8750fbc/classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="/Users/chris/.android/build-cache/e3062103444bed22c11bb66e36a01b53d0454499/output/jars/classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="25.0.2"
-        sha1="4779ebdb298a532b8931cd177e723f63445f3e07">
-        <dex dex="/Users/chris/workspace/test/ImageSearcher/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_3c73118633d61b90afb4c325352e1058e2791042/classes.dex" />
+        <dex dex="/Users/chris/workspace/github/ImageSearcher/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run_1e23ebbea7bb36ac2bc076d1c1fbfe4fe4819a46/classes.dex" />
     </item>
 
 </items>

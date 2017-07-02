@@ -17,7 +17,7 @@ import java.util.List;
 public class FlickrEngine extends Engine {
 
     private static final String BASE_URL = "https://api.flickr.com/services/rest";
-    private static final String KEY = "427539decc2167d600adda100fe7eb11";
+    private static final String KEY = "9f5524a5bf57ef94d5170e68cdabe486";
     private static final String URL_FORMAT = "https://farm%s.staticflickr.com/%s/%s_%s_%s.jpg";
 
     private static final int PER_PAGE = 20;

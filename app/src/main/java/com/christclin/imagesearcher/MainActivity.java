@@ -1,9 +1,14 @@
 package com.christclin.imagesearcher;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Environment;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.RecyclerView;
@@ -20,22 +25,31 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.Target;
 import com.christclin.imagesearcher.engine.Engine;
 import com.christclin.imagesearcher.engine.FlickrEngine;
 import com.christclin.imagesearcher.engine.PixabayEngine;
+import com.christclin.imagesearcher.widget.BaseActivity;
+import com.christclin.imagesearcher.widget.ImagesPlayerView;
 import com.christclin.imagesearcher.widget.TextAdapter;
 import com.christclin.imagesearcher.widget.MyImageView;
-import com.christclin.imagesearcher.widget.PhotoViewerActivity;
 import com.christclin.imagesearcher.widget.SpaceItemDecoration;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
+public class MainActivity extends BaseActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -45,6 +59,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private RecyclerView mRecyclerView = null;
     private ImageGridAdapter mImageAdapter = null;
+
+    private ImagesPlayerView mImagesPlayer = null;
 
     private ItemTouchHelper.Callback mItemTouchHelperCallback = new ItemTouchHelper.Callback() {
         @Override
@@ -162,6 +178,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mItemTouchHelper = new ItemTouchHelper(mItemTouchHelperCallback);
         mItemTouchHelper.attachToRecyclerView(mRecyclerView);
 
+        // set for images player
+        mImagesPlayer = (ImagesPlayerView) findViewById(R.id.images_player);
+        mImagesPlayer.setOnImageShowListener(new ImagesPlayerView.OnImageListener() {
+            @Override
+            public void onImageShow(ImageView imageView, int position) {
+                Engine.Image image = mImageAdapter.getImage(position);
+                Glide.with(MainActivity.this).load(image.getUrl()).placeholder(R.drawable.placeholder).into(imageView);
+            }
+
+            @Override
+            public void onImageSave(final int position) {
+                Log.d(TAG, "onImageSave, position=" + position);
+                if (checkPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, new OnPermissionListener() {
+                    @Override
+                    public void onPermissionGranted() {
+                        saveImage(position);
+                    }
+
+                    @Override
+                    public void onPermissionDenied() {
+
+                    }
+                })) {
+                    saveImage(position);
+                }
+            }
+        });
+
         // set default supported engines;
         mSupportedEngines.add(new PixabayEngine(this));
         mSupportedEngines.add(new FlickrEngine(this));
@@ -180,6 +224,61 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mSpinnerEngine.setAdapter(engineAdapter);
         mSpinnerEngine.setSelection(0, false);
         mSpinnerEngine.setOnItemSelectedListener(this);
+    }
+
+    private void saveImage(int position) {
+        Log.d(TAG, "saveImage, position=" + position);
+        Engine.Image image = mImageAdapter.getImage(position);
+        SimpleTarget target = new SimpleTarget<Bitmap>(SimpleTarget.SIZE_ORIGINAL, SimpleTarget.SIZE_ORIGINAL) {
+            @Override
+            public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                Snackbar.make(mImagesPlayer, R.string.msg_download_error, Snackbar.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                Log.d(TAG, "onResourceReady, resource=" + resource);
+                if (saveBitmapToFile(resource)) {
+                    Snackbar.make(mImagesPlayer, R.string.msg_download_success, Snackbar.LENGTH_SHORT).show();
+                } else {
+                    Snackbar.make(mImagesPlayer, R.string.msg_download_error, Snackbar.LENGTH_SHORT).show();
+                }
+            }
+        };
+        Glide.with(MainActivity.this).load(image.getUrl()).asBitmap().into(target);
+    }
+
+    private boolean saveBitmapToFile(Bitmap bitmap) {
+        FileOutputStream os = null;
+        try {
+            File file = Environment.getExternalStoragePublicDirectory("Pictures");
+            if (file == null) {
+                return false;
+            }
+            file = new File(file, "ImageSearcher");
+            file.mkdirs();
+            file = new File(file, System.currentTimeMillis() + ".jpg");
+            os = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
+            os.close();
+
+            // trigger media scanner to scan new file
+            Uri uri = Uri.fromFile(file);
+            Intent scanFileIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri);
+            sendBroadcast(scanFileIntent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    //e.printStackTrace();
+                }
+            }
+        }
+        return true;
     }
 
     @Override
@@ -227,6 +326,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mImages.remove(fromIdx);
             mImages.add(toIdx, image);
             notifyItemMoved(fromIdx, toIdx);
+        }
+
+        public Engine.Image getImage(int position) {
+            return mImages.get(position);
         }
 
         public void clearImages() {
@@ -278,9 +381,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onClick(View v) {
                 int position = getAdapterPosition();
-                Intent intent = new Intent(MainActivity.this, PhotoViewerActivity.class);
-                intent.putExtra(PhotoViewerActivity.ARG_URL, mImages.get(position).getUrl());
-                startActivity(intent);
+                mImagesPlayer.setImageCount(getItemCount());
+                mImagesPlayer.setCurrentPosition(position);
+                mImagesPlayer.show();
             }
         }
     }
@@ -297,5 +400,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private boolean isScrollToBottom() {
         return !mRecyclerView.canScrollVertically(1);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mImagesPlayer.getVisibility() == View.VISIBLE) {
+            mImagesPlayer.dismiss();
+        } else {
+            super.onBackPressed();
+        }
     }
 }
