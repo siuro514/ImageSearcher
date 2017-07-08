@@ -3,7 +3,6 @@ package com.christclin.imagesearcher;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
@@ -30,10 +29,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.target.Target;
 import com.christclin.imagesearcher.engine.Engine;
 import com.christclin.imagesearcher.engine.FlickrEngine;
 import com.christclin.imagesearcher.engine.PixabayEngine;
@@ -44,10 +41,13 @@ import com.christclin.imagesearcher.widget.MyImageView;
 import com.christclin.imagesearcher.widget.SpaceItemDecoration;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
 
@@ -60,6 +60,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     private RecyclerView mRecyclerView = null;
     private ImageGridAdapter mImageAdapter = null;
 
+    ExecutorService mExecutor = Executors.newFixedThreadPool(5);
     private ImagesPlayerView mImagesPlayer = null;
 
     private ItemTouchHelper.Callback mItemTouchHelperCallback = new ItemTouchHelper.Callback() {
@@ -229,38 +230,51 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     private void saveImage(int position) {
         Log.d(TAG, "saveImage, position=" + position);
         Engine.Image image = mImageAdapter.getImage(position);
-        SimpleTarget target = new SimpleTarget<Bitmap>(SimpleTarget.SIZE_ORIGINAL, SimpleTarget.SIZE_ORIGINAL) {
+        SimpleTarget<File> target = new SimpleTarget<File>(SimpleTarget.SIZE_ORIGINAL, SimpleTarget.SIZE_ORIGINAL) {
             @Override
             public void onLoadFailed(Exception e, Drawable errorDrawable) {
                 Snackbar.make(mImagesPlayer, R.string.msg_download_error, Snackbar.LENGTH_SHORT).show();
             }
 
             @Override
-            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+            public void onResourceReady(final File resource, GlideAnimation<? super File> glideAnimation) {
                 Log.d(TAG, "onResourceReady, resource=" + resource);
-                if (saveBitmapToFile(resource)) {
-                    Snackbar.make(mImagesPlayer, R.string.msg_download_success, Snackbar.LENGTH_SHORT).show();
-                } else {
-                    Snackbar.make(mImagesPlayer, R.string.msg_download_error, Snackbar.LENGTH_SHORT).show();
-                }
+                mExecutor.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (copyFile(resource)) {
+                            Snackbar.make(mImagesPlayer, R.string.msg_download_success, Snackbar.LENGTH_SHORT).show();
+                        } else {
+                            Snackbar.make(mImagesPlayer, R.string.msg_download_error, Snackbar.LENGTH_SHORT).show();
+                        }
+                    }
+                });
             }
         };
-        Glide.with(MainActivity.this).load(image.getUrl()).asBitmap().into(target);
+        Glide.with(this).load(image.getUrl()).downloadOnly(target);
     }
 
-    private boolean saveBitmapToFile(Bitmap bitmap) {
+    private boolean copyFile(File srcFile) {
         FileOutputStream os = null;
+        FileInputStream is = null;
         try {
-            File file = Environment.getExternalStoragePublicDirectory("Pictures");
+            File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
             if (file == null) {
                 return false;
             }
             file = new File(file, "ImageSearcher");
             file.mkdirs();
             file = new File(file, System.currentTimeMillis() + ".jpg");
+
+            is = new FileInputStream((srcFile));
             os = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
-            os.close();
+
+            byte[] buf = new byte[10240];
+            int len;
+            while ((len = is.read(buf, 0, 10240)) > 0) {
+                os.write(buf, 0, len);
+            }
+            os.flush();
 
             // trigger media scanner to scan new file
             Uri uri = Uri.fromFile(file);
@@ -273,6 +287,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             if (os != null) {
                 try {
                     os.close();
+                } catch (IOException e) {
+                    //e.printStackTrace();
+                }
+            }
+            if (is != null) {
+                try {
+                    is.close();
                 } catch (IOException e) {
                     //e.printStackTrace();
                 }
